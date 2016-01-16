@@ -9,10 +9,12 @@ module ObfuscateId
     self.obfuscate_id_spin = (options[:spin] || obfuscate_id_default_spin)
 
     cattr_accessor :obfuscate_id_hashid_alphabet
-    self.obfuscate_id_hashid_alphabet = (options[:alphabet] || Hashids::DEFAULT_ALPHABET)
+    self.obfuscate_id_hashid_alphabet = (options[:alphabet] ||
+      Rails.configuration.x.obfuscate_id.default_alphabet || Hashids::DEFAULT_ALPHABET)
 
     cattr_accessor :obfuscate_id_hashid_min
-    self.obfuscate_id_hashid_min = (options[:min] || 0)
+    self.obfuscate_id_hashid_min = (options[:min] ||
+      Rails.configuration.x.obfuscate_id.default_min_length || 0)
   end
 
   def self.hide(id, spin, minimum_length, alphabet)
