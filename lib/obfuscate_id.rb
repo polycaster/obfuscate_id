@@ -17,17 +17,17 @@ module ObfuscateId
   end
 
   module ClassMethods
-    def find(*args)
+    def find_by_obfuscated_id(*args)
       scope = args.slice!(0)
       options = args.slice!(0) || {}
       if has_obfuscated_id? && !options[:no_obfuscated_id]
         if scope.is_a?(Array)
-          scope.map! {|a| deobfuscate_id(a).to_i}
+          scope.map! { |a| deobfuscate_id(a).to_i }
         else
           scope = deobfuscate_id(scope)
         end
       end
-      super(scope)
+      find(scope)
     end
 
     def has_obfuscated_id?
@@ -66,9 +66,9 @@ module ObfuscateId
 
       fresh_object =
         if options && options[:lock]
-          self.class.unscoped { self.class.lock(options[:lock]).find(id, options) }
+          self.class.unscoped { self.class.lock(options[:lock]).find_by_obfuscated_id(id, options) }
         else
-          self.class.unscoped { self.class.find(id, options) }
+          self.class.unscoped { self.class.find_by_obfuscated_id(id, options) }
         end
 
       @attributes = fresh_object.instance_variable_get('@attributes')

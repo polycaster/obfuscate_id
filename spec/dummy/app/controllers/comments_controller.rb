@@ -6,7 +6,7 @@ class CommentsController < ApplicationController
   end
 
   def update
-    @comment = Comment.find(params[:id])
+    @comment = Comment.find_by_obfuscated_id(params[:id])
     if @comment.update(comment_params)
       redirect_to @comment.post
     else
