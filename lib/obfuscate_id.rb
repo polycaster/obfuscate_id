@@ -4,16 +4,23 @@ module ObfuscateId
 
     extend ClassMethods
     include InstanceMethods
+
     cattr_accessor :obfuscate_id_spin
     self.obfuscate_id_spin = (options[:spin] || obfuscate_id_default_spin)
+
+    cattr_accessor :obfuscate_id_hashid_alphabet
+    self.obfuscate_id_hashid_alphabet = (options[:alphabet] || Hashids::DEFAULT_ALPHABET)
+
+    cattr_accessor :obfuscate_id_hashid_min
+    self.obfuscate_id_hashid_min = (options[:min] || 0)
   end
 
-  def self.hide(id, spin)
-    Hashids.new(spin.to_s).encode(id)
+  def self.hide(id, spin, minimum_length, alphabet)
+    Hashids.new(spin.to_s, minimum_length, alphabet).encode(id)
   end
 
-  def self.show(id, spin)
-    Hashids.new(spin.to_s).decode(id).first
+  def self.show(id, spin, minimum_length, alphabet)
+    Hashids.new(spin.to_s, minimum_length, alphabet).decode(id).first
   end
 
   module ClassMethods
@@ -35,7 +42,10 @@ module ObfuscateId
     end
 
     def deobfuscate_id(obfuscated_id)
-      ObfuscateId.show(obfuscated_id, self.obfuscate_id_spin)
+      ObfuscateId.show(obfuscated_id,
+        self.obfuscate_id_spin,
+        self.obfuscate_id_hashid_min,
+        self.obfuscate_id_hashid_alphabet)
     end
 
     # Generate a default spin from the Model name
@@ -53,7 +63,10 @@ module ObfuscateId
 
   module InstanceMethods
     def to_param
-      ObfuscateId.hide(self.id, self.class.obfuscate_id_spin)
+      ObfuscateId.hide(self.id,
+        self.class.obfuscate_id_spin,
+        self.obfuscate_id_hashid_min,
+        self.obfuscate_id_hashid_alphabet)
     end
 
     # Override ActiveRecord::Persistence#reload
